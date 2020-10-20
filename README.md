@@ -28,7 +28,7 @@ Make
 Of course the first thing to do is to clone repository
 
 ```
-git clone https://github.com/Zenteno/Go-Engineer-Test-Zenteno
+git clone https://github.com/Zenteno/RestAPI-DDD
 ```
 
 And to start our software
