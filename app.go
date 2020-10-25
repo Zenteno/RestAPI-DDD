@@ -16,10 +16,11 @@ import (
 )
 
 var (
-	port              = flag.String("port", "3000", "Port to listen on")
-	prod              = flag.Bool("prod", false, "Enable prefork in Production")
-	sessionController controller.SessionController
-	sessionService    service.SessionService
+	port      = flag.String("port", "3000", "Port to listen on")
+	prod      = flag.Bool("prod", false, "Enable prefork in Production")
+	mongoHost = os.Getenv("MONGO_HOST")
+	mongoPort = 27017
+	mongoDB   = "my-db"
 )
 
 // @title Test DDD Golang API
@@ -31,18 +32,11 @@ var (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
+	var repo repository.SessionRepository = repository.NewMongoRepository(mongoHost, mongoPort, mongoDB, 10)
+	var sessionService service.SessionService = service.NewSessionService(repo)
+	var sessionController controller.SessionController = controller.NewSessionController(sessionService)
 
-	mongoHost := os.Getenv("MONGO_HOST")
-	mongoPort := 27017
-	mongoDB := "my-db"
-	app := Setup(repository.NewMongoRepository(mongoHost, mongoPort, mongoDB, 10))
 	flag.Parse()
-	log.Fatal(app.Listen(":" + *port))
-}
-
-func Setup(repository repository.SessionRepository) *fiber.App {
-	sessionService = service.NewSessionService(repository)
-	sessionController = controller.NewSessionController(sessionService)
 	app := fiber.New(fiber.Config{
 		Prefork: *prod,
 	})
@@ -58,5 +52,5 @@ func Setup(repository repository.SessionRepository) *fiber.App {
 
 	app.Use("/docs", swagger.Handler)
 	app.Use(sessionController.NotFound)
-	return app
+	log.Fatal(app.Listen(":" + *port))
 }

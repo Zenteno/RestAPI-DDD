@@ -40,7 +40,7 @@ func (r *repo) GetShopperLocation(shoperUUIDVal string) (*entity.ShopperHistory,
 	now := time.Now()
 	then := now.Add(-10 * time.Minute)
 	result := From(r.history).WhereT(func(i *entity.ShopperHistory) bool {
-		return i.ShopperUuid == shoperUUIDVal && i.ReportedAt.UTC().Unix() >= then.UTC().Unix()
+		return i.ShopperUuid == shoperUUIDVal && i.ReportedAt.Unix() >= then.Unix()
 	}).OrderByDescendingT(
 		func(i *entity.ShopperHistory) int64 { return i.ReportedAt.Unix() },
 	).First()
